@@ -1,0 +1,4 @@
+# ignore files for repo #
+#########################
+*.pdf
+.idea
