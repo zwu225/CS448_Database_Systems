@@ -3,6 +3,8 @@ package cs448;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ public class project1 {
 
     void load_mainmemory(String file_path) throws IOException {
         /** Put your code here **/
+
     }
 
     void load_mapdb(String file_path) throws IOException{
@@ -31,8 +34,45 @@ public class project1 {
 
     String select_file(String file_path, String key, String[] column_names) throws IOException{
         /** Put your code here **/
+        // open the file
+        FileReader fileReader = new FileReader(file_path);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-        return "";
+        // read the first header line
+        String firstLine = bufferedReader.readLine();
+        String[] headers = firstLine.split("\t");
+
+        // read the remaining line
+        String line;
+        String returnLine = "";
+        while((line = bufferedReader.readLine()) != null) {
+            String[] fields = line.split("\t");
+            if(fields[0].equals(key)) { // select the key
+                returnLine = line;  //selected line
+            }
+        }
+
+        // return formatting
+        if(!returnLine.isEmpty()) { //key is found
+            // build return string
+            String returnStr = "";
+            for(String headerRet : column_names){   //select output columns
+                int index = -1;
+                for (int i = 0; i < headers.length; i++) {
+                    if (headers[i].equals(headerRet)) {
+                        index = i;
+                        break;
+                    }
+                }
+                if(index==-1) { // requested column does not exist
+                    return "";
+                }
+                returnStr += headerRet + "=" + returnLine.split("\t")[index] + "\t";
+            }
+            return returnStr.trim();
+        } else {    //key not found
+            return "";
+        }
     }
 
     String select_mainmemory(String key, String[] column_names){
