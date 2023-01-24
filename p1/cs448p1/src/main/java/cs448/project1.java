@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.concurrent.ConcurrentMap;
 
 
@@ -25,7 +26,31 @@ public class project1 {
 
     void load_mainmemory(String file_path) throws IOException {
         /** Put your code here **/
+        // open the file
+        FileReader fileReader = new FileReader(file_path);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
 
+        // read the first header line
+        String firstLine = bufferedReader.readLine();
+        String[] headers = firstLine.split("\t");
+
+        // read the remaining line
+        String line;
+        String returnLine = "";
+        while((line = bufferedReader.readLine()) != null) { // read each line in the file
+            String[] fields = line.split("\t");
+            Dictionary<String, String> valueDic = new Hashtable<String, String>();
+            int i = 0;
+            for(String field : fields){ //put all attribute of an element into the dictionary
+                if(i == 0) {    // skip the key
+                    i++;
+                    continue;
+                }
+                valueDic.put(headers[i], field);
+                i++;
+            }
+            mm_map.put(fields[0], valueDic);    // put item into the hashmap
+        }
     }
 
     void load_mapdb(String file_path) throws IOException{
@@ -77,7 +102,18 @@ public class project1 {
 
     String select_mainmemory(String key, String[] column_names){
         /** Put your code here **/
-        return "";
+        try{
+            Dictionary returnDic = mm_map.get(key);
+            String returnStr = "";
+            for(String headerRet : column_names){
+                returnStr += headerRet + "=" + returnDic.get(headerRet) + "\t";
+            }
+            return returnStr.trim();
+        } catch (NullPointerException e) {  // key does not exist
+            e.printStackTrace();
+            System.out.println("NULL POINTER!");
+            return "";
+        }
     }
     String select_mapdb(String key, String[] column_names){
         /** Put your code here **/
