@@ -115,7 +115,8 @@ public class project1 {
                 if(index==-1) { // requested column does not exist
                     return "";
                 }
-                returnStr += headerRet + "=" + returnLine.split("\t")[index] + "\t";
+//                returnStr += headerRet + "=" + returnLine.split("\t")[index] + "\t";
+                returnStr += returnLine.split("\t")[index] + "\t";
             }
             return returnStr.trim();
         } else {    //key not found
@@ -129,7 +130,8 @@ public class project1 {
             Dictionary returnDic = mm_map.get(key);
             String returnStr = "";
             for(String headerRet : column_names){
-                returnStr += headerRet + "=" + returnDic.get(headerRet) + "\t";
+//                returnStr += headerRet + "=" + returnDic.get(headerRet) + "\t";
+                returnStr += returnDic.get(headerRet) + "\t";
             }
             return returnStr.trim();
         } catch (NullPointerException e) {  // key does not exist
@@ -144,12 +146,15 @@ public class project1 {
             Dictionary returnDic = (Dictionary) mapdb.get(key);
             String returnStr = "";
             for(String headerRet : column_names){
-                returnStr += headerRet + "=" + returnDic.get(headerRet) + "\t";
+//                returnStr += headerRet + "=" + returnDic.get(headerRet) + "\t";
+                returnStr += returnDic.get(headerRet) + "\t";
             }
+            db.close(); // done with the mapdb
             return returnStr.trim();
         } catch (NullPointerException e) {  // key does not exist
             e.printStackTrace();
             System.out.println("NULL POINTER!");
+            db.close(); // done with the mapdb
             return "";
         }
     }
@@ -158,7 +163,7 @@ public class project1 {
         // 1: Main-memory Load
         // 2: MapDB Load
         /** Put your code here **/
-        return -1;
+        return 1;   // Main-memory Load is the fastest loading method
     }
 
     int fastestSelect(){
@@ -166,6 +171,6 @@ public class project1 {
         // 1: Main-memory Select
         // 2: MapDB Select
         /** Put your code here **/
-        return -1;
+        return 0;   // File has the fast Select speed
     }
 }
