@@ -91,7 +91,8 @@ public class BufMgr {
 	 * Pin a page. First check if this page is already in the buffer pool. If it is,
 	 * increment the pin_count and return a pointer to this page. If the pin_count
 	 * was 0 before the call, the page was a replacement candidate, but is no longer
-	 * a candidate. If the page is not in the pool, choose a frame (from the set of
+	 * a candidate.
+	 * If the page is not in the pool, choose a frame (from the set of
 	 * replacement candidates) to hold this page, read the page (using the
 	 * appropriate method from diskmgr package) and pin it. Also, must write out the
 	 * old page in chosen frame if it is dirty before reading new page.(You can
@@ -106,9 +107,9 @@ public class BufMgr {
 	 */
 	public void pinPage(PageId pageno, Page page, boolean emptyPage)
 			throws BufferPoolExceededException, DiskMgrException {
-		// TODO YOUR CODE HERE
+		// YOUR CODE HERE
 		if (pageMap.containsKey(pageno.pid)) {			// page is in the frame
-			int frameNum = pageMap.get(pageno.pid);			// get the frame number
+			int frameNum = pageMap.get(pageno.pid);
 			page.setPage(bufPool[frameNum]);				// return the page pointer
 			if (frmDescr[frameNum].pinCount == 0) {			// the current pinCount is 0
 				fifo.remove(frameNum);						// remote the unpinned page from fifo
@@ -164,6 +165,20 @@ public class BufMgr {
 	public void unpinPage(PageId pageno, boolean dirty)
 			throws PageNotFoundException, PageUnpinnedException {
         // TODO YOUR CODE HERE
+		if (!pageMap.containsKey(pageno.pid)) {		// throw exception if page is not found in hash table
+			throw new PageNotFoundException("ERROR: PAGE UNPINING IS NOT FOUND IN BUFFER!");
+		}
+		int frameId = pageMap.get(pageno.pid);
+		if (frmDescr[frameId].pinCount == 0) {		// throw exception if pinCount is already 0
+			throw new PageUnpinnedException("ERROR: UNPINNING PAGE ALREADY HAS 0 PIN!");
+		}
+		frmDescr[frameId].pinCount -= 1;
+		if (frmDescr[frameId].pinCount == 0) {		// add to fifo is pinCount now is 0
+			fifo.add(frameId);
+		}
+		if (!frmDescr[frameId].dirtyBit && dirty) {		// only mark true to dirty bit if it is false before
+			frmDescr[frameId].dirtyBit = true;
+		}
 	}
 
 	/**
