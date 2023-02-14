@@ -1,9 +1,6 @@
 package bufmgr;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 import diskmgr.DiskMgrException;
 import global.Minibase;
@@ -43,7 +40,7 @@ public class BufMgr {
 
     /** fifo: queue for FIFO page replacement. All unpinned pages will be stored here, with the first element being
      * the pageID that was unpinned the longest time ago */
-	private Queue<Integer> fifo = new LinkedList<>();
+	private Queue<Integer> fifo = new LinkedList<>();	//fifo store frame index
 
 	// END OF REQUIRED INSTANCE VARIABLES
 
@@ -110,8 +107,43 @@ public class BufMgr {
 	public void pinPage(PageId pageno, Page page, boolean emptyPage)
 			throws BufferPoolExceededException, DiskMgrException {
 		// TODO YOUR CODE HERE
-		// determine if page is already in memory
+		if (pageMap.containsKey(pageno.pid)) {			// page is in the frame
+			int frameNum = pageMap.get(pageno.pid);			// get the frame number
+			page.setPage(bufPool[frameNum]);				// return the page pointer
+			if (frmDescr[frameNum].pinCount == 0) {			// the current pinCount is 0
+				fifo.remove(frameNum);						// remote the unpinned page from fifo
+			}
+			frmDescr[frameNum].pinCount += 1;				// increment pinCount
+		} else {                                        // page is not in buffer pool
+			int newFrameNum;
+			try {
+				newFrameNum = fifo.remove();
+			} catch (NoSuchElementException e) {
+				throw new BufferPoolExceededException("ERROR: NO VALID REPLACEMENT CANDIDATES!");
+			}
 
+			Minibase.DiskManager.read_page(pageno, page);    // read the page using pageno from Minibase
+
+			if (frmDescr[newFrameNum].pageno == -1) {		// empty frame
+				resetFrameDescriptor(newFrameNum, pageno.pid);
+				frmDescr[newFrameNum].pinCount += 1;
+				bufPool[newFrameNum] = page;
+				page.setPage(bufPool[newFrameNum]);
+				pageMap.put(pageno.pid, newFrameNum);
+			} else {										// not empty frame
+				if (frmDescr[newFrameNum].dirtyBit) {			// dirty bit is true
+					PageId oldPageId = new PageId(frmDescr[newFrameNum].pageno);
+					Minibase.DiskManager.write_page(oldPageId,bufPool[newFrameNum]);	// write back the dirty old page
+				}
+				pageMap.remove(frmDescr[newFrameNum].pageno);	// remove old <key, value> pair
+				resetFrameDescriptor(newFrameNum, pageno.pid);
+				frmDescr[newFrameNum].pinCount += 1;
+				bufPool[newFrameNum] = page;
+				page.setPage(bufPool[newFrameNum]);
+				pageMap.put(pageno.pid, newFrameNum);
+			}
+			page.setPage(bufPool[newFrameNum]);				// set page pointer to the frame
+		}
     }
 
 	/**
