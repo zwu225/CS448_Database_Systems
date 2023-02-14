@@ -164,7 +164,7 @@ public class BufMgr {
 	 */
 	public void unpinPage(PageId pageno, boolean dirty)
 			throws PageNotFoundException, PageUnpinnedException {
-        // TODO YOUR CODE HERE
+        // YOUR CODE HERE
 		if (!pageMap.containsKey(pageno.pid)) {		// throw exception if page is not found in hash table
 			throw new PageNotFoundException("ERROR: PAGE UNPINING IS NOT FOUND IN BUFFER!");
 		}
@@ -198,8 +198,24 @@ public class BufMgr {
 	 * @throws BufferPoolExceededException if the new page cannot be pinned after the run is allocated due to the buffer being full. If this exception is thrown, the newly allocated pages should be deallocated
 	 */
 	public PageId newPage(Page firstpage, int howmany) throws DiskMgrException, BufferPoolExceededException {
-        // TODO YOUR CODE HERE
-		return null;
+        // YOUR CODE HERE
+		PageId firstPgId = new PageId();
+		try {
+			firstPgId = Minibase.DiskManager.allocate_page(howmany);	// allocate "howMany" pages from DiskManager layer
+		} catch (BufMgrException e) {
+			throw new DiskMgrException("ERROR: Minibase.DiskManager.allocate_page() exception!");
+		}
+		try{
+			pinPage(firstPgId, firstpage, false);
+		} catch (BufferPoolExceededException e) {		// exception where buffer pool is full
+			try {
+				Minibase.DiskManager.deallocate_page(firstPgId, howmany);	// in case buffer is full, deallocate pages
+			} catch (BufMgrException ex) {
+				throw new DiskMgrException("ERROR: Minibase.DiskManager.allocate_page() exception!");
+			}
+			throw new BufferPoolExceededException("ERROR: newPage buffer pool is full!");
+		}
+		return firstPgId;
 	}
 	
 	/**
