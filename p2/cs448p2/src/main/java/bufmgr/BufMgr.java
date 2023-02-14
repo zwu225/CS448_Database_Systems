@@ -115,6 +115,7 @@ public class BufMgr {
 				fifo.remove(frameNum);						// remote the unpinned page from fifo
 			}
 			frmDescr[frameNum].pinCount += 1;				// increment pinCount
+			frmDescr[frameNum].dirtyBit = false;			// per piazza @97 post
 		} else {                                        // page is not in buffer pool
 			int newFrameNum;
 			try {
@@ -228,7 +229,22 @@ public class BufMgr {
 	 * @throws DiskMgrException if there is an error in the DiskMgr layer. This is likely caused by incorrect implementations in other methods of the Buffer Manager
 	 */
 	public void freePage(PageId pageno) throws PagePinnedException, DiskMgrException {
-        // TODO YOUR CODE HERE
+        // YOUR CODE HERE
+		if (pageMap.containsKey(pageno.pid)){	// target page is in buffer
+			int frameId = pageMap.get(pageno.pid);
+			if (frmDescr[frameId].pinCount != 0) {	// pinCount greater than 0, cannot be unpinned
+				throw new PagePinnedException("ERROR: PINCOUNT IS GREATER THAN 0, CANNOT UNPIN PAGE!");
+			} else {
+				resetFrameDescriptor(frameId);	// reset frmDescr
+				pageMap.remove(pageno.pid);		// remove page form hash table
+			}
+		}
+		// remove page from database (in or out of buffer)
+		try {
+			Minibase.DiskManager.deallocate_page(pageno);
+		} catch (BufMgrException e) {
+			throw new DiskMgrException("ERROR: Minibase.DiskManager.deallocate_page() exception!");
+		}
 	}
 
 	/**
