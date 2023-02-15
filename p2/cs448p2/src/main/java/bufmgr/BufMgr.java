@@ -118,6 +118,9 @@ public class BufMgr {
 			frmDescr[frameNum].dirtyBit = false;			// per piazza @97 post
 		} else {                                        // page is not in buffer pool
 			int newFrameNum;
+			if (fifo.isEmpty()) {
+				throw new BufferPoolExceededException("ERROR: NO VALID REPLACEMENT CANDIDATES!");
+			}
 			try {
 				newFrameNum = fifo.remove();
 			} catch (NoSuchElementException e) {
@@ -129,7 +132,6 @@ public class BufMgr {
 			if (frmDescr[newFrameNum].pageno == -1) {		// empty frame
 				resetFrameDescriptor(newFrameNum, pageno.pid);
 				frmDescr[newFrameNum].pinCount += 1;
-				bufPool[newFrameNum] = page;
 				page.setPage(bufPool[newFrameNum]);
 				pageMap.put(pageno.pid, newFrameNum);
 			} else {										// not empty frame
@@ -140,11 +142,9 @@ public class BufMgr {
 				pageMap.remove(frmDescr[newFrameNum].pageno);	// remove old <key, value> pair
 				resetFrameDescriptor(newFrameNum, pageno.pid);
 				frmDescr[newFrameNum].pinCount += 1;
-				bufPool[newFrameNum] = page;
 				page.setPage(bufPool[newFrameNum]);
 				pageMap.put(pageno.pid, newFrameNum);
 			}
-			page.setPage(bufPool[newFrameNum]);				// set page pointer to the frame
 		}
     }
 
