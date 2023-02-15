@@ -127,11 +127,12 @@ public class BufMgr {
 				throw new BufferPoolExceededException("ERROR: NO VALID REPLACEMENT CANDIDATES!");
 			}
 
-			Minibase.DiskManager.read_page(pageno, page);    // read the page using pageno from Minibase
+//			Minibase.DiskManager.read_page(pageno, page);    // read the page using pageno from Minibase
 
 			if (frmDescr[newFrameNum].pageno == -1) {		// empty frame
 				resetFrameDescriptor(newFrameNum, pageno.pid);
 				frmDescr[newFrameNum].pinCount += 1;
+				Minibase.DiskManager.read_page(pageno, bufPool[newFrameNum]);
 				page.setPage(bufPool[newFrameNum]);
 				pageMap.put(pageno.pid, newFrameNum);
 			} else {										// not empty frame
@@ -142,6 +143,7 @@ public class BufMgr {
 				pageMap.remove(frmDescr[newFrameNum].pageno);	// remove old <key, value> pair
 				resetFrameDescriptor(newFrameNum, pageno.pid);
 				frmDescr[newFrameNum].pinCount += 1;
+				Minibase.DiskManager.read_page(pageno, bufPool[newFrameNum]);
 				page.setPage(bufPool[newFrameNum]);
 				pageMap.put(pageno.pid, newFrameNum);
 			}
