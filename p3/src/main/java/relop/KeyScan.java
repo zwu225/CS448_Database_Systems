@@ -15,7 +15,7 @@ public class KeyScan extends Iterator {
    */
   public KeyScan(Schema aSchema, HashIndex aIndex, SearchKey aKey, HeapFile aFile) {
 	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+    //TODO: Your code here
   }
 
   /**
@@ -32,7 +32,7 @@ public class KeyScan extends Iterator {
   public void restart() {
 	  throw new UnsupportedOperationException("Not implemented");
 
-    //Your code here
+    //TODO: Your code here
   }
 
   /**
@@ -40,7 +40,7 @@ public class KeyScan extends Iterator {
    */
   public boolean isOpen() {
 	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+    //TODO: Your code here
   }
 
   /**
@@ -48,7 +48,7 @@ public class KeyScan extends Iterator {
    */
   public void close() {
 	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+    //TODO: Your code here
   }
 
   /**
@@ -56,7 +56,7 @@ public class KeyScan extends Iterator {
    */
   public boolean hasNext() {
 	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+    //TODO: Your code here
   }
 
   /**
@@ -66,7 +66,7 @@ public class KeyScan extends Iterator {
    */
   public Tuple getNext() {
 	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+    //TODO: Your code here
   }
 
 } // public class KeyScan extends Iterator

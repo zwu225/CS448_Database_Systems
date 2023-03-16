@@ -15,7 +15,7 @@ public class IndexScan extends Iterator {
    */
   public IndexScan(Schema schema, HashIndex index, HeapFile file) {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -24,7 +24,7 @@ public class IndexScan extends Iterator {
    */
   public void explain(int depth) {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -32,7 +32,7 @@ public class IndexScan extends Iterator {
    */
   public void restart() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -40,7 +40,7 @@ public class IndexScan extends Iterator {
    */
   public boolean isOpen() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -48,7 +48,7 @@ public class IndexScan extends Iterator {
    */
   public void close() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -56,7 +56,7 @@ public class IndexScan extends Iterator {
    */
   public boolean hasNext() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -66,7 +66,7 @@ public class IndexScan extends Iterator {
    */
   public Tuple getNext() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -74,7 +74,7 @@ public class IndexScan extends Iterator {
    */
   public SearchKey getLastKey() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
   /**
@@ -83,7 +83,7 @@ public class IndexScan extends Iterator {
    */
   public int getNextHash() {
 	  throw new UnsupportedOperationException("Not implemented");
-  //Your code here
+  //TODO: Your code here
   }
 
 } // public class IndexScan extends Iterator
