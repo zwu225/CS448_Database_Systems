@@ -24,7 +24,6 @@ public class IndexScan extends Iterator {
    */
   public void explain(int depth) {
 	  throw new UnsupportedOperationException("Not implemented");
-  //TODO: Your code here
   }
 
   /**
