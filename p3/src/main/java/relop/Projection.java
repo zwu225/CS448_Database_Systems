@@ -10,6 +10,7 @@ public class Projection extends Iterator {
     private Iterator iter = null;
     private Integer[] fields = null;
     private boolean isOpen;
+//    private Schema schema = null;
   /**
    * Constructs a projection, given the underlying iterator and field numbers.
    */
@@ -38,32 +39,38 @@ public class Projection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    iter.restart();
+    this.isOpen = true;
   }
 
   /**
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    return iter.isOpen();
   }
 
   /**
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    iter.close();
+    isOpen = false;
   }
 
   /**
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    return iter.hasNext();
   }
 
   /**
@@ -72,8 +79,14 @@ public class Projection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    Tuple nextTuple = iter.getNext();
+    Tuple nextTupleNew = new Tuple(this.schema);
+    for (int i = 0; i < fields.length; i++) {
+      nextTupleNew.setField(this.schema.fieldName(i),nextTuple.getField(fields[i]));
+    }
+    return nextTupleNew;
   }
 
 } // public class Projection extends Iterator
