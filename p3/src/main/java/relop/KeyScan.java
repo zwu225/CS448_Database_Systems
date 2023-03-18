@@ -91,16 +91,7 @@ public class KeyScan extends Iterator {
   public Tuple getNext() {
 //	  throw new UnsupportedOperationException("Not implemented");
     //: Your code here
-
-      byte[] recData = null;
-      RID nextRID = scan.getNext();
-      RID tempRID = new RID();
-
-      do{
-          recData = heapScan.getNext(tempRID);
-      } while (!tempRID.equals(nextRID));
-
-      return new Tuple(schema, recData);
+      return new Tuple(schema, file.selectRecord(scan.getNext()));
   }
 
 } // public class KeyScan extends Iterator
