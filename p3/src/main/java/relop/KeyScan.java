@@ -2,10 +2,8 @@ package relop;
 
 import global.SearchKey;
 import heap.HeapFile;
-import heap.HeapScan;
 import index.HashIndex;
 import index.HashScan;
-import global.RID;
 
 /**
  * Wrapper for hash scan, an index access method.
@@ -13,7 +11,6 @@ import global.RID;
 public class KeyScan extends Iterator {
 
     private HeapFile file = null;
-    private HeapScan heapScan = null;
     private HashIndex index = null;
     private HashScan scan = null;
     private SearchKey key = null;
@@ -27,7 +24,6 @@ public class KeyScan extends Iterator {
     //: Your code here
       this.schema = aSchema;
       this.file = aFile;
-      this.heapScan = file.openScan();
       this.index = aIndex;
       this.key = aKey;
       this.scan = index.openScan(key);
@@ -48,9 +44,7 @@ public class KeyScan extends Iterator {
   public void restart() {
 //	  throw new UnsupportedOperationException("Not implemented");
     //: Your code here
-      heapScan.close();
       scan.close();
-      heapScan = file.openScan();
       scan = index.openScan(key);
   }
 
@@ -69,7 +63,6 @@ public class KeyScan extends Iterator {
   public void close() {
 //	  throw new UnsupportedOperationException("Not implemented");
     //: Your code here
-      heapScan.close();
       scan.close();
       isOpen = false;
   }
