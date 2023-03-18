@@ -20,7 +20,7 @@ public class Selection extends Iterator {
     this.schema = aIter.getSchema();
     this.iter = aIter;
     this.preds = aPreds; 
-    this.consumed = true;
+    this.consumed = false;
     this.isOpen = true;
   }
 
@@ -37,32 +37,59 @@ public class Selection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    iter.restart();
+    this.consumed = false;
+    this.isOpen = true;
   }
 
   /**
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    return iter.isOpen();
   }
 
   /**
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    iter.close();
+    isOpen = false;
   }
 
   /**
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    if (consumed)
+      return true;
+
+    if (!iter.hasNext())
+      return false;
+
+    while (true) {
+      next = iter.getNext();
+
+      // check for all predicates
+      for (int i = 0; i < preds.length; i++) {
+        if (preds[i].evaluate(next)) {
+          consumed = true;
+          return true;
+        }
+      }
+
+      if (!iter.hasNext()){
+        return false;
+      }
+    } // end while
   }
 
   /**
@@ -71,8 +98,19 @@ public class Selection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-	  throw new UnsupportedOperationException("Not implemented");
-    //Your code here
+//	  throw new UnsupportedOperationException("Not implemented");
+    //TODO Your code here
+    if (consumed) {
+      consumed = false;
+      return next;
+    } else {  // not consumed/processed
+      if (hasNext()) {  // process now
+        consumed = false;
+        return next;
+      } else {
+        throw new IllegalStateException("ERROR: Selection no more tuples!");
+      }
+    }
   }
 
 } // public class Selection extends Iterator
