@@ -40,7 +40,7 @@ public class Projection extends Iterator {
    */
   public void restart() {
 //	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     iter.restart();
     this.isOpen = true;
   }
@@ -50,7 +50,7 @@ public class Projection extends Iterator {
    */
   public boolean isOpen() {
 //	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     return iter.isOpen();
   }
 
@@ -59,7 +59,7 @@ public class Projection extends Iterator {
    */
   public void close() {
 //	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     iter.close();
     isOpen = false;
   }
@@ -69,7 +69,7 @@ public class Projection extends Iterator {
    */
   public boolean hasNext() {
 //	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     return iter.hasNext();
   }
 
@@ -80,7 +80,7 @@ public class Projection extends Iterator {
    */
   public Tuple getNext() {
 //	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     Tuple nextTuple = iter.getNext();
     Tuple nextTupleNew = new Tuple(this.schema);
     for (int i = 0; i < fields.length; i++) {
