@@ -37,8 +37,7 @@ public class Selection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-//	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     iter.restart();
     this.consumed = false;
     this.isOpen = true;
@@ -48,8 +47,7 @@ public class Selection extends Iterator {
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-//	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     return iter.isOpen();
   }
 
@@ -57,8 +55,7 @@ public class Selection extends Iterator {
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-//	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     iter.close();
     isOpen = false;
   }
@@ -67,8 +64,7 @@ public class Selection extends Iterator {
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-//	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     if (consumed)
       return true;
 
@@ -98,8 +94,7 @@ public class Selection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-//	  throw new UnsupportedOperationException("Not implemented");
-    //TODO Your code here
+    // Your code here
     if (consumed) {
       consumed = false;
       return next;

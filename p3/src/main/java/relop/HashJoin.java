@@ -27,76 +27,42 @@ public class HashJoin extends Iterator {
 	private boolean rightNoTuple = false;
 
 	public HashJoin(Iterator aIter1, Iterator aIter2, int aJoinCol1, int aJoinCol2){
-//		// testing
-//		System.out.println("____RIGHT____");
-//		while (aIter2.hasNext()) {
-//			aIter2.getNext().print();
-//		}
-//		System.out.println("____end____");
-//		 testing end
 		//Your code here
 		this.leftCol = aJoinCol1;
 		this.rightCol = aJoinCol2;
+
 		// init left IndexScan
-		if (false) {
-			this.leftScan = (IndexScan) aIter1;
-		} else {
-			Schema leftSchema = aIter1.getSchema();
-			HashIndex leftIndex = new HashIndex(null);
-			HeapFile leftHeapFile = new HeapFile(null);
-			while(aIter1.hasNext()) {
-				Tuple tempT = aIter1.getNext();
-				leftIndex.insertEntry(
-						new SearchKey(tempT.getField(leftCol)),
-						tempT.insertIntoFile(leftHeapFile)
-				);
-			}
-			this.leftScan = new IndexScan(leftSchema, leftIndex, leftHeapFile);
-//			this.leftScan.restart();
+		Schema leftSchema = aIter1.getSchema();
+		HashIndex leftIndex = new HashIndex(null);
+		HeapFile leftHeapFile = new HeapFile(null);
+		while(aIter1.hasNext()) {
+			Tuple tempT = aIter1.getNext();
+			leftIndex.insertEntry(
+					new SearchKey(tempT.getField(leftCol)),
+					tempT.insertIntoFile(leftHeapFile)
+			);
 		}
+		this.leftScan = new IndexScan(leftSchema, leftIndex, leftHeapFile);
+
 		// init right IndexScan
-		if (false) {
-			this.rightScan = (IndexScan) aIter2;
-		} else {
-//			// testing
-//			System.out.println("____RIGHT____");
-//			while (aIter2.hasNext()) {
-//				aIter2.getNext().print();
-//			}
-//			System.out.println("____end____");
-//			// testing end
-			Schema rightSchema = aIter2.getSchema();
-			HashIndex rightIndex = new HashIndex(null);
-			HeapFile rightHeapFile = new HeapFile(null);
-			while(aIter2.hasNext()) {
-				Tuple tempT = aIter2.getNext();
-				rightIndex.insertEntry(
-						new SearchKey(tempT.getField(rightCol)),
-						tempT.insertIntoFile(rightHeapFile)
-				);
-			}
-			this.rightScan = new IndexScan(rightSchema, rightIndex, rightHeapFile);
-//			this.rightScan.restart();
+		Schema rightSchema = aIter2.getSchema();
+		HashIndex rightIndex = new HashIndex(null);
+		HeapFile rightHeapFile = new HeapFile(null);
+		while(aIter2.hasNext()) {
+			Tuple tempT = aIter2.getNext();
+			rightIndex.insertEntry(
+					new SearchKey(tempT.getField(rightCol)),
+					tempT.insertIntoFile(rightHeapFile)
+			);
 		}
+		this.rightScan = new IndexScan(rightSchema, rightIndex, rightHeapFile);
 
 		// close the Iterators
 		aIter1.close();
 		aIter2.close();
+
 		// join the schema
 		this.schema = Schema.join(leftScan.schema, rightScan.schema);
-
-//		// testing below
-//		System.out.println("____LEFT____");
-//		while (leftScan.hasNext()) {
-//			System.out.println(leftScan.getNextHash());
-//			leftScan.getNext().print();
-//		}
-//		System.out.println("____RIGHT____");
-//		while (rightScan.hasNext()) {
-//			System.out.println(rightScan.getNextHash());
-//			rightScan.getNext().print();
-//		}
-//		System.out.println("____end____");
 	}
 
 	@Override
@@ -107,7 +73,6 @@ public class HashJoin extends Iterator {
 
 	@Override
 	public void restart() {
-//		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
 		leftScan.restart();
 		rightScan.restart();
@@ -115,14 +80,12 @@ public class HashJoin extends Iterator {
 
 	@Override
 	public boolean isOpen() {
-//		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
 		return leftScan.isOpen() && rightScan.isOpen();
 	}
 
 	@Override
 	public void close() {
-//		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
 		leftScan.close();
 		rightScan.close();
@@ -130,7 +93,6 @@ public class HashJoin extends Iterator {
 
 	@Override
 	public boolean hasNext() {
-//		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
 		// resultTuples still has matched items
 		if (!resultTuples.isEmpty()) {
@@ -186,7 +148,6 @@ public class HashJoin extends Iterator {
 				return false;	// no more tuple in right
 			}
 		}
-//		int currentRightBucket = lastRightBucket;
 
 		// process right iter, one by one until a different key
 		while (true) {
@@ -203,8 +164,6 @@ public class HashJoin extends Iterator {
 					rightNoTuple = true;
 					return true;
 				}
-//				lastRightBucket = rightScan.getNextHash();
-//				lastRightTuple = rightScan.getNext();
 			} else { // right is in next bucket
 				break;
 			}
@@ -214,14 +173,12 @@ public class HashJoin extends Iterator {
 
 	@Override
 	public Tuple getNext() {
-//		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
 		while (resultTuples.isEmpty()) {
 			if (!hasNext()) {	// no more tuple
 				throw new IllegalStateException("ERROR: Hashjoin no more tuples!");
 			}
 		}
-//		System.out.println(resultTuples.isEmpty());
 		return resultTuples.remove();
 	}
 } // end class HashJoin;

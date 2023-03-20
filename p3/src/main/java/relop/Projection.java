@@ -39,7 +39,6 @@ public class Projection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-//	  throw new UnsupportedOperationException("Not implemented");
     // Your code here
     iter.restart();
     this.isOpen = true;
@@ -49,7 +48,6 @@ public class Projection extends Iterator {
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-//	  throw new UnsupportedOperationException("Not implemented");
     // Your code here
     return iter.isOpen();
   }
@@ -58,7 +56,6 @@ public class Projection extends Iterator {
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-//	  throw new UnsupportedOperationException("Not implemented");
     // Your code here
     iter.close();
     isOpen = false;
@@ -68,7 +65,6 @@ public class Projection extends Iterator {
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-//	  throw new UnsupportedOperationException("Not implemented");
     // Your code here
     return iter.hasNext();
   }
@@ -79,7 +75,6 @@ public class Projection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-//	  throw new UnsupportedOperationException("Not implemented");
     // Your code here
     Tuple nextTuple = iter.getNext();
     Tuple nextTupleNew = new Tuple(this.schema);
