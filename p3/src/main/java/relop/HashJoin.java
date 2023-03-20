@@ -24,15 +24,21 @@ public class HashJoin extends Iterator {
 	private int lastLeftBucket = -1;
 	private Tuple lastRightTuple = null;		// head of new bucket
 	private int lastRightBucket = -1;
+	private boolean rightNoTuple = false;
 
 	public HashJoin(Iterator aIter1, Iterator aIter2, int aJoinCol1, int aJoinCol2){
-//		throw new UnsupportedOperationException("Not implemented");
+//		// testing
+//		System.out.println("____RIGHT____");
+//		while (aIter2.hasNext()) {
+//			aIter2.getNext().print();
+//		}
+//		System.out.println("____end____");
+//		 testing end
 		//Your code here
 		this.leftCol = aJoinCol1;
 		this.rightCol = aJoinCol2;
-//		this.getNext = false;
 		// init left IndexScan
-		if (aIter1 instanceof IndexScan) {
+		if (false) {
 			this.leftScan = (IndexScan) aIter1;
 		} else {
 			Schema leftSchema = aIter1.getSchema();
@@ -49,9 +55,16 @@ public class HashJoin extends Iterator {
 //			this.leftScan.restart();
 		}
 		// init right IndexScan
-		if (aIter2 instanceof IndexScan) {
+		if (false) {
 			this.rightScan = (IndexScan) aIter2;
 		} else {
+//			// testing
+//			System.out.println("____RIGHT____");
+//			while (aIter2.hasNext()) {
+//				aIter2.getNext().print();
+//			}
+//			System.out.println("____end____");
+//			// testing end
 			Schema rightSchema = aIter2.getSchema();
 			HashIndex rightIndex = new HashIndex(null);
 			HeapFile rightHeapFile = new HeapFile(null);
@@ -71,6 +84,19 @@ public class HashJoin extends Iterator {
 		aIter2.close();
 		// join the schema
 		this.schema = Schema.join(leftScan.schema, rightScan.schema);
+
+//		// testing below
+//		System.out.println("____LEFT____");
+//		while (leftScan.hasNext()) {
+//			System.out.println(leftScan.getNextHash());
+//			leftScan.getNext().print();
+//		}
+//		System.out.println("____RIGHT____");
+//		while (rightScan.hasNext()) {
+//			System.out.println(rightScan.getNextHash());
+//			rightScan.getNext().print();
+//		}
+//		System.out.println("____end____");
 	}
 
 	@Override
@@ -111,12 +137,16 @@ public class HashJoin extends Iterator {
 			return true;
 		}
 
+		if (rightNoTuple) {
+			return false;
+		}
+
 		/** LEFT ITERATOR BUCKET SWEEP **/
 		// first iteration, fill in the head of the left bucket
 		if (lastLeftTuple == null) {
 			if (leftScan.hasNext()) {
-				lastLeftTuple = leftScan.getNext();
 				lastLeftBucket = leftScan.getNextHash();
+				lastLeftTuple = leftScan.getNext();
 			} else {
 				return false;	// no more tuple in left
 			}
@@ -131,8 +161,8 @@ public class HashJoin extends Iterator {
 
 		while (true) {
 			if (leftScan.hasNext()) {
-				leftTemp = leftScan.getNext();
 				leftTempBucket = leftScan.getNextHash();
+				leftTemp = leftScan.getNext();
 				if (leftTempBucket == lastLeftBucket) { // same bucket as the head
 					leftHashTable.add(new SearchKey(leftTemp.getField(leftCol)),leftTemp); // add to the hash
 				} else { // different key from the head, remake it to new head
@@ -150,8 +180,8 @@ public class HashJoin extends Iterator {
 		// first iteration, fill in the head of the right bucket
 		if (lastRightTuple == null) {
 			if (rightScan.hasNext()) {
-				lastRightTuple = rightScan.getNext();
 				lastRightBucket = rightScan.getNextHash();
+				lastRightTuple = rightScan.getNext();
 			} else {
 				return false;	// no more tuple in right
 			}
@@ -166,8 +196,15 @@ public class HashJoin extends Iterator {
 					resultTuples.add(Tuple.join(leftJoinTemp, lastRightTuple, this.schema));
 				}
 				// advance the right last tuple and bucket number
-				lastRightTuple = rightScan.getNext();
-				lastRightBucket = rightScan.getNextHash();
+				if (rightScan.hasNext()) {
+					lastRightBucket = rightScan.getNextHash();
+					lastRightTuple = rightScan.getNext();
+				} else {
+					rightNoTuple = true;
+					return true;
+				}
+//				lastRightBucket = rightScan.getNextHash();
+//				lastRightTuple = rightScan.getNext();
 			} else { // right is in next bucket
 				break;
 			}
@@ -179,7 +216,7 @@ public class HashJoin extends Iterator {
 	public Tuple getNext() {
 //		throw new UnsupportedOperationException("Not implemented");
 		//Your code here
-		if (resultTuples.isEmpty()) {
+		while (resultTuples.isEmpty()) {
 			if (!hasNext()) {	// no more tuple
 				throw new IllegalStateException("ERROR: Hashjoin no more tuples!");
 			}
