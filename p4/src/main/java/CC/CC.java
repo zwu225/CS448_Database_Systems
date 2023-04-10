@@ -1,10 +1,5 @@
 package CC;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.*;
 
 public class CC
 {
@@ -36,6 +31,8 @@ public class CC
 							return true;
 						}
 					} else if (lockType == LockType.EXCLUSIVE && currentLockType == LockType.EXCLUSIVE) { // current T already has EXCLUSIVE lock
+						return true;
+					} else if (lockType == LockType.EXCLUSIVE && currentLockType == LockType.SHARED && locks.size() == 1) {
 						return true;
 					}
 				} else { // current transaction don't have lock, so other transactions have locks
@@ -86,6 +83,63 @@ public class CC
 	 */
 	public static int[] executeSchedule(int[] db, List<String> transactions) {
 		//TODO
-		return null ;
+		LockTable lockTable = new LockTable(db.length);
+		int numTrans = transactions.size();
+		Queue<String>[] action = new Queue[numTrans];
+		int noMoreToken;
+		List<String> log = new ArrayList<>();
+		int Timestamp = 0;
+		int[] timeTransaction = new int[numTrans];
+
+		// Insert actions
+		for (int i = 0; i < numTrans; i++) {
+			action[i] = new LinkedList<>();
+			String[] operations = transactions.get(i).split(";");
+			for (String token:operations) {
+				action[i].add(token);
+			}
+			timeTransaction[i] = -1;
+		}
+
+		// Round-Robin execution of actions from transactions
+		do{
+			noMoreToken = 0;
+			for (int i = 0; i < numTrans; i++) {
+				if (!action[i].isEmpty()) {
+					String token = action[i].peek();
+					int transactionId = i + 1;
+					/* -------TOKEN PROCESS------- */
+					if (token.startsWith("W")) { // W(<RecordID>,<Value>)
+						String[] parts = token.substring(2, token.length() - 1).split(",");
+						int recordId = Integer.parseInt(parts[0]);
+						int value = Integer.parseInt(parts[1]);
+						boolean locked = lockTable.acquireLock(recordId, transactionId, LockType.EXCLUSIVE);
+						if (locked) {
+							db[recordId] = value;
+							action[i].remove();
+							System.out.printf("W(%d, %d)\n", recordId, value);
+						}
+
+					} else if (token.startsWith("R")) { // R(<RecordID>)
+						int recordId = Integer.parseInt(token.substring(2, token.length() - 1));
+						boolean locked = lockTable.acquireLock(recordId, transactionId, LockType.SHARED);
+						if (locked) {
+							action[i].remove();
+							System.out.printf("R(%d)\n", recordId);
+						}
+					} else if (token.equals("C")) { // C
+						lockTable.releaseLocks(transactionId);
+						action[i].remove();
+						System.out.println("C");
+					}
+					/* -------TOKEN PROCESS------- */
+				} else {
+					noMoreToken++;
+				}
+			}
+		} while (noMoreToken < numTrans);
+
+		return db;
+//		return null ;
 	}
 }
