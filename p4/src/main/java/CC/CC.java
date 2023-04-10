@@ -82,13 +82,12 @@ public class CC
 	 * @return the final status of the db
 	 */
 	public static int[] executeSchedule(int[] db, List<String> transactions) {
-		//TODO
 		LockTable lockTable = new LockTable(db.length);
 		int numTrans = transactions.size();
 		Queue<String>[] action = new Queue[numTrans];
 		int noMoreToken;
 		List<String> log = new ArrayList<>();
-		int Timestamp = 0;
+		int timestamp = 0;
 		int[] timeTransaction = new int[numTrans];
 
 		// Insert actions
@@ -115,22 +114,33 @@ public class CC
 						int value = Integer.parseInt(parts[1]);
 						boolean locked = lockTable.acquireLock(recordId, transactionId, LockType.EXCLUSIVE);
 						if (locked) {
+							int oldValue = db[recordId];
 							db[recordId] = value;
 							action[i].remove();
-							System.out.printf("W(%d, %d)\n", recordId, value);
+//							System.out.printf("W(%d, %d)\n", recordId, value);
+							log.add(String.format("W:%d,T%d,%d,%d,%d,%d",timestamp, transactionId, recordId, oldValue, value, timeTransaction[i]));
+							timeTransaction[i] = timestamp;
+							timestamp++;
 						}
 
 					} else if (token.startsWith("R")) { // R(<RecordID>)
 						int recordId = Integer.parseInt(token.substring(2, token.length() - 1));
 						boolean locked = lockTable.acquireLock(recordId, transactionId, LockType.SHARED);
 						if (locked) {
+							int readValue = db[recordId];
 							action[i].remove();
-							System.out.printf("R(%d)\n", recordId);
+//							System.out.printf("R(%d)\n", recordId);
+							log.add(String.format("R:%d,T%d,%d,%d,%d",timestamp, transactionId, recordId, readValue, timeTransaction[i]));
+							timeTransaction[i] = timestamp;
+							timestamp++;
 						}
 					} else if (token.equals("C")) { // C
 						lockTable.releaseLocks(transactionId);
 						action[i].remove();
-						System.out.println("C");
+//						System.out.println("C");
+						log.add(String.format("C:%d,T%d,%d",timestamp, transactionId, timeTransaction[i]));
+						timeTransaction[i] = timestamp;
+						timestamp++;
 					}
 					/* -------TOKEN PROCESS------- */
 				} else {
@@ -139,7 +149,11 @@ public class CC
 			}
 		} while (noMoreToken < numTrans);
 
+		// print log to console
+		for (String str:log) {
+			System.out.println(str);
+		}
+
 		return db;
-//		return null ;
 	}
 }
