@@ -8,8 +8,10 @@ public class CC
 	 */
 	private static class LockTable {
 		private Map<Integer, Map<Integer, LockType>> table;    // <RecordId, <>>
+		private int numRecords;
 
 		public LockTable(int recordCount) {    // new LockTable constructor
+			this.numRecords = recordCount;
 			table = new HashMap<>();
 			for (int i = 0; i < recordCount; i++) {
 				table.put(i, new HashMap<>());
@@ -61,6 +63,22 @@ public class CC
 			Map<Integer, LockType> locks = table.get(recordId);
 			return locks.containsKey(transactionId);
 		}
+
+		public int abortTrans() {
+			for (int i = numRecords; i > 0; i--) {
+				int unlockCount = 0;
+				for (Map<Integer, LockType> locks : table.values()) { // check for locks in current transaction
+					if (locks.containsKey(i)) {	//remove all the locks from the lowest priority transaction
+						locks.remove(i);
+						unlockCount++;
+					}
+				}
+				if (unlockCount > 0) {	// if any unlocked, do not continue to the next transaction
+					return i;
+				}
+			}
+			return -1; // return -1: no active locks
+		}
 	}
 
 	public enum LockType {
@@ -89,6 +107,7 @@ public class CC
 		List<String> log = new ArrayList<>();
 		int timestamp = 0;
 		int[] timeTransaction = new int[numTrans];
+		List<Boolean> enable = new ArrayList<>();
 
 		// Insert actions
 		for (int i = 0; i < numTrans; i++) {
@@ -100,10 +119,22 @@ public class CC
 			timeTransaction[i] = -1;
 		}
 
+		// init enable-abort flag for all transactions (for deadlock control)
+		for (int i = 0; i < numTrans; i++) {
+			enable.add(true);    // init as enable for all transactions
+		}
+
+
 		// Round-Robin execution of actions from transactions
 		do{
 			noMoreToken = 0;
 			for (int i = 0; i < numTrans; i++) {
+				// skip aborted/finished transaction
+				if (!enable.get(i)) { // if current transaction is aborted/finished
+					noMoreToken++;
+					continue;
+				}
+
 				if (!action[i].isEmpty()) {
 					String token = action[i].peek();
 					int transactionId = i + 1;
@@ -143,7 +174,8 @@ public class CC
 						timestamp++;
 					}
 					/* -------TOKEN PROCESS------- */
-				} else {
+				} else { // no more token in current transaction
+					enable.set(i, false); // set enable to false
 					noMoreToken++;
 				}
 			}
