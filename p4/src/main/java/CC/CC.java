@@ -68,12 +68,12 @@ public class CC
 			for (int i = numRecords; i > 0; i--) {
 				int unlockCount = 0;
 				for (Map<Integer, LockType> locks : table.values()) { // check for locks in current transaction
-					if (locks.containsKey(i)) {	//remove all the locks from the lowest priority transaction
+					if (locks.containsKey(i)) {    //remove all the locks from the lowest priority transaction
 						locks.remove(i);
 						unlockCount++;
 					}
 				}
-				if (unlockCount > 0) {	// if any unlocked, do not continue to the next transaction
+				if (unlockCount > 0) {    // if any unlocked, do not continue to the next transaction
 					return i;
 				}
 			}
@@ -106,8 +106,9 @@ public class CC
 		int noMoreToken;
 		List<String> log = new ArrayList<>();
 		int timestamp = 0;
-		int[] timeTransaction = new int[numTrans];
-		List<Boolean> enable = new ArrayList<>();
+		int[] timeTransaction = new int[numTrans]; // note: index is (transactionID-1)
+		List<Boolean> enable = new ArrayList<>(); // note: T1 is index 0
+		int waitCount = 0; // count the number of times any transaction wait for locks (for deadlock control)
 
 		// Insert actions
 		for (int i = 0; i < numTrans; i++) {
@@ -148,10 +149,12 @@ public class CC
 							int oldValue = db[recordId];
 							db[recordId] = value;
 							action[i].remove();
-//							System.out.printf("W(%d, %d)\n", recordId, value);
 							log.add(String.format("W:%d,T%d,%d,%d,%d,%d",timestamp, transactionId, recordId, oldValue, value, timeTransaction[i]));
 							timeTransaction[i] = timestamp;
 							timestamp++;
+							waitCount = 0;
+						} else {
+							waitCount++; // count this wait time
 						}
 
 					} else if (token.startsWith("R")) { // R(<RecordID>)
@@ -160,15 +163,16 @@ public class CC
 						if (locked) {
 							int readValue = db[recordId];
 							action[i].remove();
-//							System.out.printf("R(%d)\n", recordId);
 							log.add(String.format("R:%d,T%d,%d,%d,%d",timestamp, transactionId, recordId, readValue, timeTransaction[i]));
 							timeTransaction[i] = timestamp;
 							timestamp++;
+							waitCount = 0;
+						} else {
+							waitCount++; // count this wait time
 						}
 					} else if (token.equals("C")) { // C
 						lockTable.releaseLocks(transactionId);
 						action[i].remove();
-//						System.out.println("C");
 						log.add(String.format("C:%d,T%d,%d",timestamp, transactionId, timeTransaction[i]));
 						timeTransaction[i] = timestamp;
 						timestamp++;
@@ -178,7 +182,37 @@ public class CC
 					enable.set(i, false); // set enable to false
 					noMoreToken++;
 				}
+			} // end for
+
+			/* ---- Deadlock Control ---- */
+			// check if deadlock exist
+			int activeCount = 0;
+			for (Boolean value : enable) { // get the number of trues in enable
+				if (value) {
+					activeCount++;
+				}
 			}
+			// start abort the lowest priority transaction
+			if (waitCount >= activeCount && waitCount > 0) {
+				int abortedTransactionId = lockTable.abortTrans();
+				enable.set(abortedTransactionId-1, false);
+				// roll back
+				String abortedTransaction = String.format("T%d",abortedTransactionId);
+				for (int i = log.size() - 1; i >= 0; i--) { // roll back using the log
+					String str = log.get(i);
+					if (str.contains(abortedTransaction) && str.contains("W")) {
+						String[] parts = str.split(",");
+						int recordId = Integer.parseInt(parts[2]);
+						int oldValue = Integer.parseInt(parts[3]);
+						db[recordId] = oldValue;
+					}
+				}
+				// add to the log
+				log.add(String.format("A:%d,T%d,%d",timestamp, abortedTransactionId, timeTransaction[abortedTransactionId-1]));
+				timeTransaction[abortedTransactionId-1] = timestamp;
+				timestamp++;
+			}
+
 		} while (noMoreToken < numTrans);
 
 		// print log to console
